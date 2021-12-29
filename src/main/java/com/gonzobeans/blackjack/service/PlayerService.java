@@ -2,11 +2,13 @@ package com.gonzobeans.blackjack.service;
 
 import com.gonzobeans.blackjack.exception.PlayerManagementException;
 import com.gonzobeans.blackjack.model.Player;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -22,6 +24,9 @@ public class PlayerService {
     }
 
     public Player registerPlayer(String name) {
+        if (StringUtils.isBlank(name)) {
+            throw new PlayerManagementException("Player name must not be blank.");
+        }
         var player = Player.builder()
                 .id(UUID.randomUUID().toString())
                 .name(name)
@@ -30,6 +35,10 @@ public class PlayerService {
                 .build();
         playerMap.put(player.getId(), player);
         return player;
+    }
+
+    public Optional<Player> getPlayer(String playerId) {
+        return Optional.ofNullable(playerMap.get(playerId));
     }
 
     public List<String> listPlayers() {

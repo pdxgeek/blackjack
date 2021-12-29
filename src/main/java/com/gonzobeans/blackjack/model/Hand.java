@@ -6,6 +6,7 @@ import lombok.Getter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static com.gonzobeans.blackjack.model.Card.Face.ACE;
 
@@ -55,13 +56,12 @@ public class Hand {
     }
 
     public int calculateValue() {
-        int value = 0;
-        for (var card : cards) {
-            value = value + card.pointValue();
-        }
-        if (value <= 21 && cards.stream().anyMatch(card -> card.getFace().equals(ACE))) {
-            value = value + 10;
-        }
-        return value;
+        var value = cards.stream()
+                .mapToInt(Card::pointValue)
+                .sum();
+
+        return (value <= 11 && cards.stream().anyMatch(card -> card.getFace().equals(ACE)))
+                ? value + 10
+                :value;
     }
 }
