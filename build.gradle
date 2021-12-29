@@ -1,22 +1,11 @@
 plugins {
 	id 'org.springframework.boot' version '2.6.2'
 	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+	id 'io.freefair.lombok' version '6.3.0'
 	id 'java'
 }
 
-group = 'com.gonzobeans'
-version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '17'
+apply from: 'gradle/setup.gradle'
+apply from: 'gradle/dependencies.gradle'
+apply from: 'gradle/test.gradle'
 
-repositories {
-	mavenCentral()
-}
-
-dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-}
-
-test {
-	useJUnitPlatform()
-}

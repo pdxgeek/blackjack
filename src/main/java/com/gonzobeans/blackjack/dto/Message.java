@@ -1,2 +1,7 @@
-package com.gonzobeans.blackjack.dto;public interface Message {
+package com.gonzobeans.blackjack.dto;
+
+import java.time.Instant;
+
+public interface Message {
+    Instant getTimestamp();
 }
