@@ -1,4 +1,4 @@
-package com.gonzobeans.blackjack.service;
+package com.gonzobeans.blackjack.game;
 
 import com.gonzobeans.blackjack.model.Card;
 

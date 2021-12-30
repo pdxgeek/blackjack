@@ -1,9 +1,13 @@
 package com.gonzobeans.blackjack.model;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
+@EqualsAndHashCode
 @RequiredArgsConstructor
 public class Card implements Comparable<Card> {
     private final Face face;
@@ -19,6 +23,14 @@ public class Card implements Comparable<Card> {
         this.color = suit.getColor();
     }
 
+    public static Card newCard(Face face, Suit suit) {
+        return new Card(face, suit);
+    }
+
+    public static Card newJoker(Color color) {
+        return new Card(Face.JOKER, Suit.NONE, color);
+    }
+
     public Face getFace() {
         return hidden ? Face.HIDDEN : face;
     }
@@ -27,12 +39,8 @@ public class Card implements Comparable<Card> {
         return hidden ? Suit.HIDDEN : suit;
     }
 
-    public static Card of(Face face, Suit suit) {
-        return new Card(face, suit);
-    }
-
-    public static Card jokerOf(Color color) {
-        return new Card(Face.JOKER, Suit.NONE, color);
+    public String peek() {
+        return face + " of " + suit;
     }
 
     public int pointValue() {
@@ -49,23 +57,32 @@ public class Card implements Comparable<Card> {
         return getFace() + (getSuit() == Suit.HIDDEN ? "" :  " of " + getSuit());
     }
 
-    public String peek() {
-        return face + " of " + suit;
-    }
 
+    @Getter
+    @RequiredArgsConstructor
     public enum Color {
-        RED, BLACK, NONE
+        RED("Red"), BLACK("Black"), NONE(""), HIDDEN("Hidden");
+
+        private final String name;
+
+        @Override
+        public String toString() {
+            return name;
+        }
     }
 
     @Getter
     @RequiredArgsConstructor
     public enum Suit {
-        HEART("Hearts", Color.RED),
-        CLUB("Clubs", Color.BLACK),
-        DIAMOND("Diamonds", Color.RED),
-        SPADE("Spades", Color.BLACK),
+        HEARTS("Hearts", Color.RED),
+        CLUBS("Clubs", Color.BLACK),
+        DIAMONDS("Diamonds", Color.RED),
+        SPADES("Spades", Color.BLACK),
         NONE("None", Color.NONE),
         HIDDEN("Hidden", Color.NONE);
+
+        public static final List<Suit> CARD_SUITS =
+                List.of(CLUBS, DIAMONDS, HEARTS, SPADES);
 
         private final String name;
         private final Color color;
@@ -94,6 +111,12 @@ public class Card implements Comparable<Card> {
         KING("King", 10,13, "K"),
         JOKER("Joker", 0,14, "W"),
         HIDDEN("Hidden", 0,0, "?");
+
+        public static final List<Face> STANDARD_CARD_FACES =
+                List.of(ACE, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE, TEN, JACK, QUEEN, KING);
+
+        public static final List<Face> CARD_FACES_WITH_JOKER =
+                List.of(ACE, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE, TEN, JACK, QUEEN, KING, JOKER);
 
         private final String name;
         private final int pointValue;
