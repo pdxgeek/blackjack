@@ -20,7 +20,7 @@ public abstract class Hand {
     }
 
     public List<String> displayCards() {
-        return cards.stream().map(Card::display).collect(Collectors.toList());
+        return cards.stream().map(Card::toString).collect(Collectors.toList());
     }
 
     public boolean blackjack() {

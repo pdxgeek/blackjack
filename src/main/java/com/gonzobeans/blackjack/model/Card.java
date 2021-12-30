@@ -11,7 +11,6 @@ public class Card implements Comparable<Card> {
     private final Color color;
 
     @Setter
-    // Hidden cards may not be seen by other players
     private boolean hidden = false;
 
     private Card(Face face, Suit suit) {
@@ -47,11 +46,11 @@ public class Card implements Comparable<Card> {
 
     @Override
     public String toString() {
-        return face + " of " + suit;
+        return getFace() + (getSuit() == Suit.HIDDEN ? "" :  " of " + getSuit());
     }
 
-    public String display() {
-        return getFace() + ((getSuit() == Suit.HIDDEN) ? "" :  " of " + getSuit());
+    public String peek() {
+        return face + " of " + suit;
     }
 
     public enum Color {
