@@ -1,20 +1,31 @@
 package com.gonzobeans.blackjack.model;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
-@Getter
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class Card implements Comparable<Card> {
     private final Face face;
     private final Suit suit;
     private final Color color;
 
+    @Setter
+    // Hidden cards may not be seen by other players
+    private boolean hidden = false;
+
     private Card(Face face, Suit suit) {
         this.face = face;
         this.suit = suit;
         this.color = suit.getColor();
+    }
+
+    public Face getFace() {
+        return hidden ? Face.HIDDEN : face;
+    }
+
+    public Suit getSuit() {
+        return hidden ? Suit.HIDDEN : suit;
     }
 
     public static Card of(Face face, Suit suit) {
@@ -26,7 +37,7 @@ public class Card implements Comparable<Card> {
     }
 
     public int pointValue() {
-        return face.getPointValue();
+        return getFace().getPointValue();
     }
 
     @Override
@@ -37,6 +48,10 @@ public class Card implements Comparable<Card> {
     @Override
     public String toString() {
         return face + " of " + suit;
+    }
+
+    public String display() {
+        return getFace() + ((getSuit() == Suit.HIDDEN) ? "" :  " of " + getSuit());
     }
 
     public enum Color {
@@ -50,7 +65,8 @@ public class Card implements Comparable<Card> {
         CLUB("Clubs", Color.BLACK),
         DIAMOND("Diamonds", Color.RED),
         SPADE("Spades", Color.BLACK),
-        NONE("None", Color.NONE);
+        NONE("None", Color.NONE),
+        HIDDEN("Hidden", Color.NONE);
 
         private final String name;
         private final Color color;
@@ -77,7 +93,8 @@ public class Card implements Comparable<Card> {
         JACK("Jack", 10, 11, "J"),
         QUEEN("Queen", 10, 12, "Q"),
         KING("King", 10,13, "K"),
-        JOKER("Joker", 0,14, "W");
+        JOKER("Joker", 0,14, "W"),
+        HIDDEN("Hidden", 0,0, "?");
 
         private final String name;
         private final int pointValue;
