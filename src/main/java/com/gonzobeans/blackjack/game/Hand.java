@@ -6,6 +6,7 @@ import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static com.gonzobeans.blackjack.model.Card.Face.ACE;
@@ -13,11 +14,12 @@ import static com.gonzobeans.blackjack.model.Card.Face.ACE;
 @Getter
 public abstract class Hand {
     private static final int TWENTY_ONE = 21;
-
+    private final String id;
     private final List<Card> cards;
 
     public Hand() {
         this.cards = new ArrayList<>();
+        this.id = UUID.randomUUID().toString();
     }
 
     public List<String> displayCards() {
@@ -34,6 +36,10 @@ public abstract class Hand {
 
     public boolean isEmpty() {
         return cards.size() == 0;
+    }
+
+    public boolean isPlayable() {
+        return calculateValue() < 21;
     }
 
     public int size() {
