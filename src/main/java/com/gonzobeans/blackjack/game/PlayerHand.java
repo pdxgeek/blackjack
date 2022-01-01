@@ -29,14 +29,16 @@ public class PlayerHand extends Hand {
         return super.isPlayable() && handOpen;
     }
 
+    public void stay() {
+        this.handOpen = false;
+        nextAction = Action.NOT_AVAILABLE;
+    }
+
     public void hit(Shoe shoe) {
         if (!isPlayable()) {
             throw new BlackJackRulesException("Hand is not playable.");
         }
-        addCard(shoe.draw().orElseThrow(() -> {
-            nextAction = Action.NOT_AVAILABLE;
-            return new NoCardsAvailableException("No cards left in shoe.");
-        }));
+        addCard(getCardFromShoe(shoe));
         nextAction = isPlayable()
                 ? Action.NONE_SELECTED
                 : Action.NOT_AVAILABLE;
@@ -61,16 +63,11 @@ public class PlayerHand extends Hand {
         nextAction = Action.NOT_AVAILABLE;
     }
 
-    public void stay() {
-        this.handOpen = false;
-        nextAction = Action.NOT_AVAILABLE;
-    }
-
     public boolean canSplit(Player player) {
         return player.getMoney() >= bet
                 && handOpen
                 && size() == 2
-                && getCards().get(0).pointValue() == getCards().get(1).pointValue();
+                && getCards().get(0).getFace().equals(getCards().get(1).getFace());
     }
 
     public PlayerHand split(Player player, Shoe shoe) {
@@ -115,7 +112,7 @@ public class PlayerHand extends Hand {
     }
 
     public enum Action {
-        NONE_SELECTED, HIT, STAY, SPLIT, DOUBLE_DOWN, INSURANCE, NOT_AVAILABLE
+        NONE_SELECTED, STAY, HIT, SPLIT, DOUBLE_DOWN, INSURANCE, NOT_AVAILABLE
     }
 
     private Card getCardFromShoe(Shoe shoe) {
