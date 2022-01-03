@@ -3,6 +3,7 @@ package com.gonzobeans.blackjack.game;
 import com.gonzobeans.blackjack.exception.BlackJackRulesException;
 import com.gonzobeans.blackjack.exception.BlackJackTableException;
 import com.gonzobeans.blackjack.model.Player;
+import com.gonzobeans.blackjack.dto.PlayerAction;
 import com.gonzobeans.blackjack.model.Shoe;
 import lombok.Getter;
 
@@ -10,30 +11,29 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import static com.fasterxml.jackson.core.JsonToken.NOT_AVAILABLE;
+
 import static com.gonzobeans.blackjack.game.BlackJackUtil.addToArrayMap;
 import static com.gonzobeans.blackjack.game.BlackJackUtil.getCardFromShoe;
 import static com.gonzobeans.blackjack.game.BlackJackUtil.getMoneyFromPlayer;
 import static com.gonzobeans.blackjack.game.BlackJackUtil.payoutToPlayer;
-import static com.gonzobeans.blackjack.model.Action.DOUBLE_DOWN;
-import static com.gonzobeans.blackjack.model.Action.HIT;
-import static com.gonzobeans.blackjack.model.Action.SPLIT;
 import static com.gonzobeans.blackjack.game.PlayerHand.HandStatus.CURRENT_TURN;
 import static com.gonzobeans.blackjack.game.PlayerHand.HandStatus.INSURANCE_SELECTED;
 import static com.gonzobeans.blackjack.game.PlayerHand.HandStatus.WAITING_FOR_INSURANCE;
 import static com.gonzobeans.blackjack.game.PlayerHand.HandStatus.WAITING_FOR_TURN;
 import static com.gonzobeans.blackjack.game.PlayerHand.HandStatus.WAITING_TO_RESOLVE;
 import static com.gonzobeans.blackjack.game.PlayerHand.Insurance.ACCEPTED;
-import static com.gonzobeans.blackjack.model.Action.STAY;
+import static com.gonzobeans.blackjack.model.Action.NOT_AVAILABLE;
 import static com.gonzobeans.blackjack.model.Card.Face.ACE;
+import static java.lang.String.format;
 
 public class Round {
     @Getter
     private final String id;
-    private final List<Player> players;
     private final Shoe shoe;
     private final DealerHand dealerHand;
     private final Map<Player, List<PlayerHand>> playerHands;
@@ -43,23 +43,35 @@ public class Round {
 
     public Round(List<Player> players, Shoe shoe, int minimumBet) {
         this.id = UUID.randomUUID().toString();
-        this.players = players;
         this.shoe = shoe;
         this.playerHands = new HashMap<>();
+        players.forEach(p -> playerHands.put(p, null));
         this.minimumBet = minimumBet;
         this.dealerHand = new DealerHand();
         this.roundStatus = RoundStatus.NOT_STARTED;
     }
 
     public void start() {
-        if (players.isEmpty()) {
+        if (playerHands.isEmpty()) {
             throw new BlackJackTableException("Must have at least one player to start game");
         }
+        shoe.startNewGame();
         roundStatus = RoundStatus.BETS;
     }
 
+    public void processAction(PlayerAction action) {
+        switch (action.getAction()) {
+            case LEAVE_TABLE -> playerHands.remove(action.getPlayer());
+            case BET -> takeBet(action.getPlayer(), action.getActionValue());
+            case ACCEPT_INSURANCE -> buyInsurance(getHand(action.getPlayer(), action.getHandId()));
+            case DECLINE_INSURANCE -> declineInsurance(getHand(action.getPlayer(), action.getHandId()));
+            case HIT, STAY, SPLIT, DOUBLE_DOWN -> getHand(action.getPlayer(), action.getHandId())
+                    .setNextAction(action.getAction());
+        }
+    }
+
     public void runGame() {
-        if (playerHands.size() == players.size()) {
+        if (playerHands.size() == playerHands.values().stream().filter(Objects::nonNull).count()) {
             dealCards();
             roundStatus = RoundStatus.TURNS;
             checkInsurance();
@@ -110,8 +122,8 @@ public class Round {
 
     private void checkInsurance() {
         if (dealerHand.getCards().get(1).getFace().equals(ACE)) {
-            players.stream()
-                    .flatMap(player -> playerHands.get(player).stream())
+            playerHands.values().stream()
+                    .flatMap(Collection::stream)
                     .forEach(PlayerHand::offerInsurance);
             processInsurance();
         }
@@ -119,14 +131,13 @@ public class Round {
 
     private void processInsurance() {
         var continueProcessing = false;
-        for (var player : players) {
-            for (var hand : playerHands.get(player)) {
-                if (hand.getHandStatus().equals(WAITING_FOR_INSURANCE)) {
-                    continueProcessing = true;
-                    break;
-                }
+        for (var hand : getAllPlayerHands().toList()) {
+            if (hand.getHandStatus().equals(WAITING_FOR_INSURANCE)) {
+                continueProcessing = true;
+                break;
             }
         }
+
         // TODO: Send Status
         if (continueProcessing) {
             processInsurance();
@@ -135,17 +146,17 @@ public class Round {
 
     private void processTurns() {
         var continueProcessing = true;
-        for (var player : players) {
-            for (var hand : playerHands.get(player)) {
-                if (hand.getHandStatus().equals(WAITING_FOR_TURN) && continueProcessing) {
-                    continueProcessing = false;
-                    hand.setHandStatus(CURRENT_TURN);
-                } else if (hand.getHandStatus().equals(CURRENT_TURN)) {
-                    continueProcessing = false;
-                    processTurn(hand);
-                }
+
+        for (var hand : getAllPlayerHands().toList()) {
+            if (hand.getHandStatus().equals(WAITING_FOR_TURN) && continueProcessing) {
+                continueProcessing = false;
+                hand.setHandStatus(CURRENT_TURN);
+            } else if (hand.getHandStatus().equals(CURRENT_TURN)) {
+                continueProcessing = false;
+                processTurn(hand);
             }
         }
+
         if (continueProcessing) {
             resolve();
         }
@@ -189,27 +200,34 @@ public class Round {
 
     private void processTurn(PlayerHand hand) {
         switch (hand.getNextAction()) {
-            case STAY:
+            case STAY -> {
                 hand.stay();
                 hand.setHandStatus(WAITING_TO_RESOLVE);
-                break;
-            case HIT:
+            }
+            case HIT -> {
                 if (hand.hit(shoe).equals(NOT_AVAILABLE)) {
                     hand.setHandStatus(WAITING_TO_RESOLVE);
                 }
-                break;
-            case DOUBLE_DOWN:
+            }
+            case DOUBLE_DOWN -> {
                 hand.doubleDown(shoe);
                 hand.setHandStatus(WAITING_TO_RESOLVE);
-                break;
-            case SPLIT:
+            }
+            case SPLIT -> {
                 var newHand = hand.split(shoe);
                 addToArrayMap(hand.getPlayer(), newHand, playerHands);
-                break;
-            default:
-                break;
+            }
         }
         processTurns();
+    }
+
+    private PlayerHand getHand(Player player, String handId) {
+        return Optional.ofNullable(playerHands.get(player))
+                .flatMap(hands -> hands.stream().
+                        filter(hand -> hand.getId().equals(handId))
+                        .findAny()).orElseThrow(() -> new BlackJackTableException(
+                                format("Player hand with Id %s does not exist", handId)
+                ));
     }
 
     private Stream<PlayerHand> getAllPlayerHands() {

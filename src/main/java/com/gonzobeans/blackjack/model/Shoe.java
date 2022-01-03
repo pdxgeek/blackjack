@@ -16,12 +16,15 @@ import static com.gonzobeans.blackjack.model.Card.Suit.CARD_SUITS;
 
 public class Shoe {
     private static final int SHUFFLE_DEPTH = 10;
+    private static final int MINIMUM_RESHUFFLE = 52;
 
     @Getter
     private final List<Card> cards;
 
     @Getter
     private final Deque<Card> discards;
+
+    private int marker;
 
     private final int deckCount;
 
@@ -36,6 +39,13 @@ public class Shoe {
         return new Shoe(deckCount);
     }
 
+    public void startNewGame() {
+        if (cards.size() < marker || cards.size() < MINIMUM_RESHUFFLE) {
+            shuffle();
+            // TODO: Notify Table of Shuffle
+        }
+    }
+
     public void shuffle() {
         cards.clear();
         discards.clear();
@@ -46,6 +56,7 @@ public class Shoe {
                 Collections.swap(cards, i, random.nextInt(cards.size() - 1));
             }
         }
+        marker = ThreadLocalRandom.current().nextInt(cards.size() / 4, cards.size() / 2);
     }
 
     public Optional<Card> draw() {

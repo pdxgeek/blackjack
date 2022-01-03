@@ -8,13 +8,22 @@ import com.gonzobeans.blackjack.model.Player;
 import com.gonzobeans.blackjack.model.Shoe;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
+import java.util.Set;
+
+import static com.gonzobeans.blackjack.model.Action.DOUBLE_DOWN;
+import static com.gonzobeans.blackjack.model.Action.HIT;
+import static com.gonzobeans.blackjack.model.Action.SPLIT;
+import static com.gonzobeans.blackjack.model.Action.STAY;
+
+@Slf4j
 @Getter
 public class PlayerHand extends Hand {
+    private static final Set<Action> HAND_ACTIONS = Set.of(HIT, STAY, DOUBLE_DOWN, SPLIT);
     private final Player player;
     private int bet;
     @Setter
-
     private HandStatus handStatus;
     private Action nextAction;
     private boolean handOpen;
@@ -29,6 +38,13 @@ public class PlayerHand extends Hand {
         this.insurance = Insurance.NA;
         handStatus = HandStatus.READY_TO_DEAL;
         nextAction = Action.NONE_SELECTED;
+    }
+
+    public void setNextAction(Action action) {
+        if (!HAND_ACTIONS.contains(action)) {
+            throw new IllegalStateException("Unsupported action passed to hand: " + action.name());
+        }
+        nextAction = action;
     }
 
     @Override
@@ -136,7 +152,6 @@ public class PlayerHand extends Hand {
     public enum Insurance {
         NA, WAITING, ACCEPTED, DECLINED
     }
-
 
     public enum HandStatus {
         READY_TO_DEAL, WAITING_FOR_INSURANCE, INSURANCE_SELECTED, WAITING_FOR_TURN, CURRENT_TURN, WAITING_TO_RESOLVE,
