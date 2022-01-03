@@ -1,5 +1,7 @@
 package com.gonzobeans.blackjack.service;
 
+import com.gonzobeans.blackjack.exception.BlackJackRulesException;
+import com.gonzobeans.blackjack.exception.GameException;
 import com.gonzobeans.blackjack.exception.PlayerManagementException;
 import com.gonzobeans.blackjack.model.Player;
 import org.apache.commons.lang3.StringUtils;
@@ -17,10 +19,23 @@ import static java.lang.String.format;
 @Service
 public class PlayerService {
     private static final int STARTING_MONEY = 1000;
+    private static PlayerService instance;
+
     private final Map<String, Player> playerMap;
 
-    public PlayerService() {
+    private PlayerService() {
         playerMap = new HashMap<>();
+        if (instance != null) {
+            throw new IllegalStateException();
+        }
+        instance = this;
+    }
+
+    public static synchronized PlayerService getInstance() {
+        if (instance == null) {
+            instance = new PlayerService();
+        }
+        return instance;
     }
 
     public Player registerPlayer(String name) {
@@ -39,6 +54,29 @@ public class PlayerService {
 
     public Optional<Player> getPlayer(String playerId) {
         return Optional.ofNullable(playerMap.get(playerId));
+    }
+
+    public double checkFunds(String playerId) {
+        var player = getPlayer(playerId)
+                .orElseThrow(() -> new GameException("Player " + playerId + "does not exist"));
+        return player.getMoney();
+    }
+
+    public int withdraw(String playerId, int amount) {
+        var player = getPlayer(playerId)
+                .orElseThrow(() -> new GameException("Player " + playerId + "does not exist"));
+        if (player.getMoney() < amount) {
+            throw new BlackJackRulesException(format("Player %s does not have enough funds. Requested: %s, "
+                    + "Available: %s", player.getId(), amount, player.getMoney()));
+        }
+        player.setMoney(player.getMoney() - amount);
+        return amount;
+    }
+
+    public void payoutToPlayer(String playerId, double amount) {
+        var player = getPlayer(playerId)
+                .orElseThrow(() -> new GameException("Player " + playerId + "does not exist"));
+        player.setMoney(player.getMoney() + amount);
     }
 
     public List<String> listPlayers() {

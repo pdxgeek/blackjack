@@ -1,11 +1,9 @@
 package com.gonzobeans.blackjack.game;
 
 import com.gonzobeans.blackjack.exception.BlackJackRulesException;
-import com.gonzobeans.blackjack.exception.NoCardsAvailableException;
 import com.gonzobeans.blackjack.model.Action;
-import com.gonzobeans.blackjack.model.Card;
-import com.gonzobeans.blackjack.model.Player;
 import com.gonzobeans.blackjack.model.Shoe;
+import com.gonzobeans.blackjack.service.PlayerService;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -21,18 +19,17 @@ import static com.gonzobeans.blackjack.model.Action.STAY;
 @Getter
 public class PlayerHand extends Hand {
     private static final Set<Action> HAND_ACTIONS = Set.of(HIT, STAY, DOUBLE_DOWN, SPLIT);
-    private final Player player;
+    private final String playerId;
     private int bet;
     @Setter
     private HandStatus handStatus;
     private Action nextAction;
     private boolean handOpen;
     private Insurance insurance;
-    private int payout;
 
-    public PlayerHand(Player player, int bet) {
+    public PlayerHand(String playerId, int bet) {
         super();
-        this.player = player;
+        this.playerId = playerId;
         this.bet = bet;
         this.handOpen = true;
         this.insurance = Insurance.NA;
@@ -61,14 +58,14 @@ public class PlayerHand extends Hand {
         if (!isPlayable()) {
             throw new BlackJackRulesException("Hand is not playable.");
         }
-        addCard(getCardFromShoe(shoe));
+        addCard(shoe.draw());
         return isPlayable()
                 ? Action.NONE_SELECTED
                 : Action.NOT_AVAILABLE;
     }
 
-    public boolean canDoubleDown(Player player) {
-        return player.getMoney() >= bet
+    public boolean canDoubleDown() {
+        return PlayerService.getInstance().checkFunds(playerId) >= bet
                 && handOpen
                 && size() == 2
                 && calculateValue() >= 9
@@ -76,18 +73,18 @@ public class PlayerHand extends Hand {
     }
 
     public void doubleDown(Shoe shoe) {
-        if (!canDoubleDown(player)) {
+        if (!canDoubleDown()) {
             nextAction = Action.NONE_SELECTED;
             throw new BlackJackRulesException("Hand is not eligible to double down");
         }
-        bet = bet + getMoneyFromPlayer(player, bet);
-        addCard(getCardFromShoe(shoe));
+        bet = bet + PlayerService.getInstance().withdraw(playerId, bet);
+        addCard(shoe.draw());
         this.handOpen = false;
         nextAction = Action.NOT_AVAILABLE;
     }
 
     public boolean canSplit() {
-        return player.getMoney() >= bet
+        return PlayerService.getInstance().checkFunds(playerId) >= bet
                 && handOpen
                 && size() == 2
                 && getCards().get(0).getFace().equals(getCards().get(1).getFace());
@@ -98,11 +95,11 @@ public class PlayerHand extends Hand {
             nextAction = Action.NONE_SELECTED;
             throw new BlackJackRulesException("Splitting is not available.");
         }
-        var newHand = new PlayerHand(player, getMoneyFromPlayer(player, bet));
+        var newHand = new PlayerHand(playerId, PlayerService.getInstance().withdraw(playerId, bet));
         newHand.addCard(getCards().get(1));
         getCards().remove(1);
-        addCard(getCardFromShoe(shoe));
-        newHand.addCard(getCardFromShoe(shoe));
+        addCard(shoe.draw());
+        newHand.addCard(shoe.draw());
         nextAction = Action.NONE_SELECTED;
         return newHand;
     }
@@ -115,9 +112,9 @@ public class PlayerHand extends Hand {
         return insurance.equals(Insurance.DECLINED) || insurance.equals(Insurance.ACCEPTED);
     }
 
-    public boolean canBuyInsurance(Player player) {
+    public boolean canBuyInsurance() {
         var requiredMoney = bet / 2;
-        return player.getMoney() >= requiredMoney
+        return PlayerService.getInstance().checkFunds(playerId) >= requiredMoney
                 && handOpen
                 && !insurance.equals(Insurance.NA)
                 && !insurance.equals(Insurance.ACCEPTED)
@@ -125,28 +122,15 @@ public class PlayerHand extends Hand {
     }
 
     public void buyInsurance() {
-        if (!canBuyInsurance(player)) {
+        if (!canBuyInsurance()) {
             throw new BlackJackRulesException("Hand not eligible for insurance");
         }
-        getMoneyFromPlayer(player, bet / 2);
+        PlayerService.getInstance().withdraw(playerId, bet / 2);
         insurance = Insurance.ACCEPTED;
     }
 
     public void declineInsurance() {
         insurance = Insurance.DECLINED;
-    }
-
-    private Card getCardFromShoe(Shoe shoe) {
-        return shoe.draw().orElseThrow(() -> new NoCardsAvailableException("No cards left in shoe."));
-    }
-
-    private int getMoneyFromPlayer(Player player, int amount) {
-        if (player.getMoney() < amount) {
-            nextAction = Action.NONE_SELECTED;
-            throw new BlackJackRulesException("Not enough funds for action.");
-        }
-        player.setMoney(player.getMoney() - amount);
-        return amount;
     }
 
     public enum Insurance {

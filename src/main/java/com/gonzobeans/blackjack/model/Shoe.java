@@ -1,11 +1,10 @@
 package com.gonzobeans.blackjack.model;
 
+import com.gonzobeans.blackjack.exception.NoCardsAvailableException;
 import lombok.Getter;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Deque;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
@@ -21,16 +20,12 @@ public class Shoe {
     @Getter
     private final List<Card> cards;
 
-    @Getter
-    private final Deque<Card> discards;
-
     private int marker;
 
     private final int deckCount;
 
     private Shoe(int deckCount) {
         this.cards = new ArrayList<>();
-        this.discards = new ArrayDeque<>();
         this.deckCount = deckCount;
         shuffle();
     }
@@ -48,7 +43,6 @@ public class Shoe {
 
     public void shuffle() {
         cards.clear();
-        discards.clear();
         cards.addAll(getDecks(deckCount));
         var random = ThreadLocalRandom.current();
         for (int x = 0; x < SHUFFLE_DEPTH; x++) {
@@ -59,17 +53,17 @@ public class Shoe {
         marker = ThreadLocalRandom.current().nextInt(cards.size() / 4, cards.size() / 2);
     }
 
-    public Optional<Card> draw() {
+    public Card draw() {
+        return getCard().orElseThrow(() -> new NoCardsAvailableException("No cards left in shoe."));
+    }
+
+    public Optional<Card> getCard() {
         if (!cards.isEmpty()) {
             var card = cards.get(0);
             cards.remove(0);
             return Optional.of(card);
         }
         return Optional.empty();
-    }
-
-    public void discard(Card card) {
-        discards.push(card);
     }
 
     private static List<Card> getDecks(int count) {

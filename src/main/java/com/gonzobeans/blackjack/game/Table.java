@@ -1,8 +1,7 @@
 package com.gonzobeans.blackjack.game;
 
-import com.gonzobeans.blackjack.exception.BlackJackTableException;
-import com.gonzobeans.blackjack.model.Player;
 import com.gonzobeans.blackjack.dto.PlayerAction;
+import com.gonzobeans.blackjack.exception.BlackJackTableException;
 import com.gonzobeans.blackjack.model.Shoe;
 import com.gonzobeans.blackjack.model.TableInformation;
 import lombok.Getter;
@@ -22,7 +21,7 @@ public class Table {
     private final String id;
     private final String name;
     private final int minimumBet;
-    private final Map<Integer, Player> seats;
+    private final Map<Integer, String> seats;
     private final Shoe shoe;
 
     private Round currentRound;
@@ -46,10 +45,10 @@ public class Table {
 
     public void processPlayerAction(PlayerAction action) {
         switch (action.getAction()) {
-            case SIT_AT_TABLE -> seatPlayer(action.getActionValue(), action.getPlayer());
+            case SIT_AT_TABLE -> seatPlayer(action.getActionValue(), action.getPlayerId());
             case LEAVE_TABLE -> {
                 seats.entrySet().stream()
-                        .filter(entry -> entry.getValue().equals(action.getPlayer()))
+                        .filter(entry -> entry.getValue().equals(action.getPlayerId()))
                         .findFirst().ifPresent(entry -> seats.put(entry.getKey(), null));
                 currentRound.processAction(action);
             }
@@ -62,20 +61,20 @@ public class Table {
         }
     }
 
-    public Optional<Player> getPlayerBySeat(int seatNumber) {
+    public Optional<String> getPlayerBySeat(int seatNumber) {
         validateSeatNumber(seatNumber);
         return Optional.ofNullable(seats.get(seatNumber));
     }
 
-    public void seatPlayer(int seatNumber, Player player) {
+    public void seatPlayer(int seatNumber, String playerId) {
         validateSeatNumber(seatNumber);
-        getPlayerBySeat(seatNumber).ifPresentOrElse(p -> {
-                throw new BlackJackTableException("Player " + p.getId() + " is already seated here.");
-            }, () -> seats.put(seatNumber, player));
+        getPlayerBySeat(seatNumber).ifPresentOrElse(player -> {
+                throw new BlackJackTableException("Player " + player + " is already seated here.");
+            }, () -> seats.put(seatNumber, playerId));
     }
 
-    private List<Player> getSeatedPlayers() {
-        var playerList = new ArrayList<Player>();
+    private List<String> getSeatedPlayers() {
+        var playerList = new ArrayList<String>();
         for (int i = 1; i <= 7; i++) {
             getPlayerBySeat(i).ifPresent(playerList::add);
         }
