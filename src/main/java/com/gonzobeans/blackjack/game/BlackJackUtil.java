@@ -6,6 +6,10 @@ import com.gonzobeans.blackjack.model.Card;
 import com.gonzobeans.blackjack.model.Player;
 import com.gonzobeans.blackjack.model.Shoe;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import static java.lang.String.format;
 
 public final class BlackJackUtil {
@@ -25,5 +29,17 @@ public final class BlackJackUtil {
         }
         player.setMoney(player.getMoney() - amount);
         return amount;
+    }
+
+    public static void payoutToPlayer(Player player, int amount) {
+        player.setMoney(player.getMoney() + amount);
+    }
+
+    public static <K, V> void addToArrayMap(K key, V value, Map<K, List<V>> map) {
+        if (map.containsKey(key)) {
+            map.get(key).add(value);
+        } else {
+            map.put(key, new ArrayList<>(List.of(value)));
+        }
     }
 }

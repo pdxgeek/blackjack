@@ -34,6 +34,10 @@ public abstract class Hand {
         return calculateValue() > TWENTY_ONE;
     }
 
+    public boolean notBusted() {
+        return calculateValue() <= TWENTY_ONE;
+    }
+
     public boolean isEmpty() {
         return cards.size() == 0;
     }

@@ -13,5 +13,5 @@ public class Player {
     private String id;
     private String key;
     private String name;
-    private int money;
+    private double money;
 }
