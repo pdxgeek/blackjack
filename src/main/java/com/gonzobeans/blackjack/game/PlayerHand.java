@@ -2,6 +2,7 @@ package com.gonzobeans.blackjack.game;
 
 import com.gonzobeans.blackjack.exception.BlackJackRulesException;
 import com.gonzobeans.blackjack.exception.NoCardsAvailableException;
+import com.gonzobeans.blackjack.model.Action;
 import com.gonzobeans.blackjack.model.Card;
 import com.gonzobeans.blackjack.model.Player;
 import com.gonzobeans.blackjack.model.Shoe;
@@ -38,7 +39,6 @@ public class PlayerHand extends Hand {
     public void stay() {
         this.handOpen = false;
         nextAction = Action.NOT_AVAILABLE;
-
     }
 
     public Action hit(Shoe shoe) {
@@ -137,9 +137,6 @@ public class PlayerHand extends Hand {
         NA, WAITING, ACCEPTED, DECLINED
     }
 
-    public enum Action {
-        NONE_SELECTED, STAY, HIT, SPLIT, DOUBLE_DOWN, NOT_AVAILABLE
-    }
 
     public enum HandStatus {
         READY_TO_DEAL, WAITING_FOR_INSURANCE, INSURANCE_SELECTED, WAITING_FOR_TURN, CURRENT_TURN, WAITING_TO_RESOLVE,

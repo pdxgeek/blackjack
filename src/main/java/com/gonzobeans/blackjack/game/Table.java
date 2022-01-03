@@ -2,14 +2,18 @@ package com.gonzobeans.blackjack.game;
 
 import com.gonzobeans.blackjack.exception.BlackJackTableException;
 import com.gonzobeans.blackjack.model.Player;
+import com.gonzobeans.blackjack.model.PlayerAction;
 import com.gonzobeans.blackjack.model.TableInformation;
 import lombok.Getter;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 @Getter
@@ -38,6 +42,14 @@ public class Table {
                 .build();
     }
 
+    public void processPlayerAction(PlayerAction playerAction) {
+        if (!StringUtils.equals(playerAction.getRoundId(), currentRound.getId())) {
+            throw new BlackJackTableException("Action submitted for incorrect round.");
+        }
+
+
+    }
+
     public Optional<Player> getPlayerBySeat(int seatNumber) {
         validateSeatNumber(seatNumber);
         return Optional.ofNullable(seats.get(seatNumber));
@@ -56,6 +68,14 @@ public class Table {
             getPlayerBySeat(i).ifPresent(playerList::add);
         }
         return playerList;
+    }
+
+    private Set<String> getSeatedPlayerIds() {
+        var players = new HashSet<String>();
+        for (int i = 1; i <= 7; i++) {
+            getPlayerBySeat(i).map(Player::getId).ifPresent(players::add);
+        }
+        return players;
     }
 
     private void validateSeatNumber(int seatNumber) {

@@ -13,19 +13,25 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import static com.fasterxml.jackson.core.JsonToken.NOT_AVAILABLE;
 import static com.gonzobeans.blackjack.game.BlackJackUtil.addToArrayMap;
 import static com.gonzobeans.blackjack.game.BlackJackUtil.getCardFromShoe;
 import static com.gonzobeans.blackjack.game.BlackJackUtil.getMoneyFromPlayer;
 import static com.gonzobeans.blackjack.game.BlackJackUtil.payoutToPlayer;
+import static com.gonzobeans.blackjack.model.Action.DOUBLE_DOWN;
+import static com.gonzobeans.blackjack.model.Action.HIT;
+import static com.gonzobeans.blackjack.model.Action.SPLIT;
 import static com.gonzobeans.blackjack.game.PlayerHand.HandStatus.CURRENT_TURN;
 import static com.gonzobeans.blackjack.game.PlayerHand.HandStatus.INSURANCE_SELECTED;
 import static com.gonzobeans.blackjack.game.PlayerHand.HandStatus.WAITING_FOR_INSURANCE;
 import static com.gonzobeans.blackjack.game.PlayerHand.HandStatus.WAITING_FOR_TURN;
 import static com.gonzobeans.blackjack.game.PlayerHand.HandStatus.WAITING_TO_RESOLVE;
 import static com.gonzobeans.blackjack.game.PlayerHand.Insurance.ACCEPTED;
+import static com.gonzobeans.blackjack.model.Action.STAY;
 import static com.gonzobeans.blackjack.model.Card.Face.ACE;
 
 public class Round {
+    @Getter
     private final String id;
     private final List<Player> players;
     private final Shoe shoe;
@@ -188,7 +194,7 @@ public class Round {
                 hand.setHandStatus(WAITING_TO_RESOLVE);
                 break;
             case HIT:
-                if (hand.hit(shoe).equals(PlayerHand.Action.NOT_AVAILABLE)) {
+                if (hand.hit(shoe).equals(NOT_AVAILABLE)) {
                     hand.setHandStatus(WAITING_TO_RESOLVE);
                 }
                 break;
