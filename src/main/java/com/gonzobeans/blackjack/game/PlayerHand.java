@@ -1,8 +1,7 @@
 package com.gonzobeans.blackjack.game;
 
 import com.gonzobeans.blackjack.exception.BlackJackRulesException;
-import com.gonzobeans.blackjack.model.Action;
-import com.gonzobeans.blackjack.model.Shoe;
+import com.gonzobeans.blackjack.dto.HandInformation;
 import com.gonzobeans.blackjack.service.PlayerService;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,10 +9,10 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.Set;
 
-import static com.gonzobeans.blackjack.model.Action.DOUBLE_DOWN;
-import static com.gonzobeans.blackjack.model.Action.HIT;
-import static com.gonzobeans.blackjack.model.Action.SPLIT;
-import static com.gonzobeans.blackjack.model.Action.STAY;
+import static com.gonzobeans.blackjack.game.Action.DOUBLE_DOWN;
+import static com.gonzobeans.blackjack.game.Action.HIT;
+import static com.gonzobeans.blackjack.game.Action.SPLIT;
+import static com.gonzobeans.blackjack.game.Action.STAY;
 
 @Slf4j
 @Getter
@@ -131,6 +130,18 @@ public class PlayerHand extends Hand {
 
     public void declineInsurance() {
         insurance = Insurance.DECLINED;
+    }
+
+    @Override
+    public HandInformation getInfo() {
+        return HandInformation.builder()
+                .id(getId())
+                .status(handStatus)
+                .insurance(insurance)
+                .bet(bet)
+                .cards(getCards().stream().map(Card::toCode).toList())
+                .handValue(calculateValue() > 0 ? calculateValue() : null)
+                .build();
     }
 
     public enum Insurance {

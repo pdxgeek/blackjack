@@ -1,7 +1,5 @@
 package com.gonzobeans.blackjack.game;
 
-import com.gonzobeans.blackjack.model.Card;
-
 public class DealerHand extends Hand {
     public DealerHand() {
         super();

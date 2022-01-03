@@ -1,4 +1,4 @@
-package com.gonzobeans.blackjack.model;
+package com.gonzobeans.blackjack.game;
 
 import com.gonzobeans.blackjack.exception.NoCardsAvailableException;
 import lombok.Getter;
@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 
-import static com.gonzobeans.blackjack.model.Card.Face.STANDARD_CARD_FACES;
-import static com.gonzobeans.blackjack.model.Card.Suit.CARD_SUITS;
+import static com.gonzobeans.blackjack.game.Card.Face.STANDARD_CARD_FACES;
+import static com.gonzobeans.blackjack.game.Card.Suit.CARD_SUITS;
 
 
 public class Shoe {

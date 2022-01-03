@@ -1,4 +1,4 @@
-package com.gonzobeans.blackjack.model;
+package com.gonzobeans.blackjack.game;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

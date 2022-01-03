@@ -1,6 +1,6 @@
 package com.gonzobeans.blackjack.dto;
 
-import com.gonzobeans.blackjack.model.Action;
+import com.gonzobeans.blackjack.game.Action;
 import lombok.Data;
 
 @Data

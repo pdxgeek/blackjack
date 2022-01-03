@@ -1,7 +1,7 @@
 package com.gonzobeans.blackjack.game;
 
 import com.gonzobeans.blackjack.exception.BlackJackRulesException;
-import com.gonzobeans.blackjack.model.Card;
+import com.gonzobeans.blackjack.dto.HandInformation;
 import lombok.Getter;
 
 import java.util.ArrayList;
@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static com.gonzobeans.blackjack.model.Card.Face.ACE;
+import static com.gonzobeans.blackjack.game.Card.Face.ACE;
 
 @Getter
 public abstract class Hand {
@@ -65,5 +65,12 @@ public abstract class Hand {
         return (value <= 11 && cards.stream().anyMatch(card -> card.getFace().equals(ACE)))
                 ? value + 10
                 : value;
+    }
+
+    public HandInformation getInfo() {
+        return HandInformation.builder()
+                .cards(getCards().stream().map(Card::toCode).toList())
+                .handValue(calculateValue() > 0 ? calculateValue() : null)
+                .build();
     }
 }

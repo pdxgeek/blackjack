@@ -1,7 +1,7 @@
 package com.gonzobeans.blackjack.service;
 
 import com.gonzobeans.blackjack.game.Table;
-import com.gonzobeans.blackjack.model.TableInformation;
+import com.gonzobeans.blackjack.dto.TableInformation;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;

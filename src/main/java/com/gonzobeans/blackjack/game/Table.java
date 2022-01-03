@@ -2,8 +2,7 @@ package com.gonzobeans.blackjack.game;
 
 import com.gonzobeans.blackjack.dto.PlayerAction;
 import com.gonzobeans.blackjack.exception.BlackJackTableException;
-import com.gonzobeans.blackjack.model.Shoe;
-import com.gonzobeans.blackjack.model.TableInformation;
+import com.gonzobeans.blackjack.dto.TableInformation;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 

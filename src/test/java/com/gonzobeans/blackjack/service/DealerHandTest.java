@@ -3,11 +3,11 @@ package com.gonzobeans.blackjack.service;
 import com.gonzobeans.blackjack.game.DealerHand;
 import org.junit.jupiter.api.Test;
 
-import static com.gonzobeans.blackjack.model.Card.Face.ACE;
-import static com.gonzobeans.blackjack.model.Card.Face.JACK;
-import static com.gonzobeans.blackjack.model.Card.Suit.HEARTS;
-import static com.gonzobeans.blackjack.model.Card.Suit.SPADES;
-import static com.gonzobeans.blackjack.model.Card.newCard;
+import static com.gonzobeans.blackjack.game.Card.Face.ACE;
+import static com.gonzobeans.blackjack.game.Card.Face.JACK;
+import static com.gonzobeans.blackjack.game.Card.Suit.HEARTS;
+import static com.gonzobeans.blackjack.game.Card.Suit.SPADES;
+import static com.gonzobeans.blackjack.game.Card.newCard;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 

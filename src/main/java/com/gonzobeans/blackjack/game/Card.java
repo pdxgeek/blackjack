@@ -1,4 +1,4 @@
-package com.gonzobeans.blackjack.model;
+package com.gonzobeans.blackjack.game;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -57,7 +57,9 @@ public class Card implements Comparable<Card> {
         return getFace() + (getSuit() == Suit.HIDDEN ? "" :  " of " + getSuit());
     }
 
-
+    public String toCode() {
+        return getFace().getSymbol() + getSuit().getSymbol();
+    }
     @Getter
     @RequiredArgsConstructor
     public enum Color {
@@ -74,18 +76,19 @@ public class Card implements Comparable<Card> {
     @Getter
     @RequiredArgsConstructor
     public enum Suit {
-        HEARTS("Hearts", Color.RED),
-        CLUBS("Clubs", Color.BLACK),
-        DIAMONDS("Diamonds", Color.RED),
-        SPADES("Spades", Color.BLACK),
-        NONE("None", Color.NONE),
-        HIDDEN("Hidden", Color.NONE);
+        HEARTS("Hearts", Color.RED, "H"),
+        CLUBS("Clubs", Color.BLACK, "C"),
+        DIAMONDS("Diamonds", Color.RED, "D"),
+        SPADES("Spades", Color.BLACK, "S"),
+        NONE("None", Color.NONE, ""),
+        HIDDEN("Hidden", Color.NONE, "?");
 
         public static final List<Suit> CARD_SUITS =
                 List.of(CLUBS, DIAMONDS, HEARTS, SPADES);
 
         private final String name;
         private final Color color;
+        private final String symbol;
 
         @Override
         public String toString() {

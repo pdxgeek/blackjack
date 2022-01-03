@@ -3,7 +3,7 @@ package com.gonzobeans.blackjack.service;
 import com.gonzobeans.blackjack.exception.BlackJackRulesException;
 import com.gonzobeans.blackjack.exception.GameException;
 import com.gonzobeans.blackjack.exception.PlayerManagementException;
-import com.gonzobeans.blackjack.model.Player;
+import com.gonzobeans.blackjack.game.Player;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 

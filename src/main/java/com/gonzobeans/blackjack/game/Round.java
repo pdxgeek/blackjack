@@ -3,7 +3,6 @@ package com.gonzobeans.blackjack.game;
 import com.gonzobeans.blackjack.dto.PlayerAction;
 import com.gonzobeans.blackjack.exception.BlackJackRulesException;
 import com.gonzobeans.blackjack.exception.BlackJackTableException;
-import com.gonzobeans.blackjack.model.Shoe;
 import com.gonzobeans.blackjack.service.PlayerService;
 import com.gonzobeans.blackjack.util.GameUtil;
 import lombok.Getter;
@@ -22,8 +21,8 @@ import static com.gonzobeans.blackjack.game.PlayerHand.HandStatus.INSURANCE_SELE
 import static com.gonzobeans.blackjack.game.PlayerHand.HandStatus.WAITING_FOR_INSURANCE;
 import static com.gonzobeans.blackjack.game.PlayerHand.HandStatus.WAITING_FOR_TURN;
 import static com.gonzobeans.blackjack.game.PlayerHand.HandStatus.WAITING_TO_RESOLVE;
-import static com.gonzobeans.blackjack.model.Action.NOT_AVAILABLE;
-import static com.gonzobeans.blackjack.model.Card.Face.ACE;
+import static com.gonzobeans.blackjack.game.Action.NOT_AVAILABLE;
+import static com.gonzobeans.blackjack.game.Card.Face.ACE;
 import static com.gonzobeans.blackjack.util.GameUtil.addToArrayMap;
 import static java.lang.String.format;
 
@@ -206,7 +205,7 @@ public class Round {
         return playerHands.values().stream().flatMap(Collection::stream);
     }
 
-    private enum RoundStatus {
+    public enum RoundStatus {
         NOT_STARTED, BETS, TURNS, RESOLUTION, COMPLETE
     }
 }

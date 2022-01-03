@@ -1,6 +1,6 @@
 package com.gonzobeans.blackjack.controller;
 
-import com.gonzobeans.blackjack.model.Player;
+import com.gonzobeans.blackjack.game.Player;
 import com.gonzobeans.blackjack.service.PlayerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
