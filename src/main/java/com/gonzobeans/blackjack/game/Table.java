@@ -30,7 +30,7 @@ public class Table {
         this.name = name;
         this.minimumBet = minimumBet;
         this.shoe = Shoe.ofStandardCards(DECK_COUNT);
-        seats = new HashMap<>();
+        this.seats = new HashMap<>();
     }
 
     public TableInformation getInformation() {
@@ -44,18 +44,21 @@ public class Table {
 
     public void processPlayerAction(PlayerAction action) {
         switch (action.getAction()) {
-            case SIT_AT_TABLE -> seatPlayer(action.getActionValue(), action.getPlayerId());
+            case SIT_AT_TABLE -> {
+                seatPlayer(action.getActionValue(), action.getPlayerId());
+                getCurrentRound().processAction(action);
+            }
             case LEAVE_TABLE -> {
                 seats.entrySet().stream()
                         .filter(entry -> entry.getValue().equals(action.getPlayerId()))
                         .findFirst().ifPresent(entry -> seats.put(entry.getKey(), null));
-                currentRound.processAction(action);
+                getCurrentRound().processAction(action);
             }
             default -> {
                 if (!StringUtils.equals(action.getRoundId(), currentRound.getId())) {
                     throw new BlackJackTableException("Action submitted for incorrect round.");
                 }
-                currentRound.processAction(action);
+                getCurrentRound().processAction(action);
             }
         }
     }
@@ -84,5 +87,12 @@ public class Table {
         if (seatNumber < 1 || seatNumber > MAX_PLAYERS) {
             throw new BlackJackTableException("Invalid Seat Number: " + seatNumber);
         }
+    }
+
+    private synchronized Round getCurrentRound() {
+        if (currentRound == null) {
+            currentRound = new Round(getSeatedPlayers(), shoe, minimumBet);
+        }
+        return currentRound;
     }
 }

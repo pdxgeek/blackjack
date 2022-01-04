@@ -38,9 +38,13 @@ public final class GameUtil {
 
     private static void resolveDealerNonBlackJack(DealerHand dealerHand, PlayerHand hand) {
         if (hand.blackjack()) {
+            hand.setHandStatus(PlayerHand.HandStatus.WIN);
             PlayerService.getInstance().payoutToPlayer(hand.getPlayerId(), (hand.getBet() * 1.5));
         } else if (hand.calculateValue() > dealerHand.calculateValue()) {
+            hand.setHandStatus(PlayerHand.HandStatus.WIN);
             PlayerService.getInstance().payoutToPlayer(hand.getPlayerId(), hand.getBet());
+        } else {
+            hand.setHandStatus(PlayerHand.HandStatus.LOSS);
         }
     }
 
@@ -50,6 +54,9 @@ public final class GameUtil {
                 PlayerService.getInstance().payoutToPlayer(hand.getPlayerId(), (double) hand.getBet() / 2);
             }
             PlayerService.getInstance().payoutToPlayer(hand.getPlayerId(), hand.getBet());
+            hand.setHandStatus(PlayerHand.HandStatus.INSURANCE_PAID);
+        } else {
+            hand.setHandStatus(PlayerHand.HandStatus.LOSS);
         }
     }
 }

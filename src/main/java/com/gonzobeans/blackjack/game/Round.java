@@ -1,6 +1,8 @@
 package com.gonzobeans.blackjack.game;
 
 import com.gonzobeans.blackjack.dto.PlayerAction;
+import com.gonzobeans.blackjack.dto.PlayerRoundInformation;
+import com.gonzobeans.blackjack.dto.RoundInformation;
 import com.gonzobeans.blackjack.exception.BlackJackRulesException;
 import com.gonzobeans.blackjack.exception.BlackJackTableException;
 import com.gonzobeans.blackjack.service.PlayerService;
@@ -56,6 +58,13 @@ public class Round {
 
     public void processAction(PlayerAction action) {
         switch (action.getAction()) {
+            case SIT_AT_TABLE -> {
+                if (roundStatus.equals(RoundStatus.NOT_STARTED) || roundStatus.equals(RoundStatus.BETS)) {
+                    playerHands.put(action.getPlayerId(), null);
+                } else {
+                    throw new BlackJackTableException("Cannot join game that has already started.");
+                }
+            }
             case LEAVE_TABLE -> playerHands.remove(action.getPlayerId());
             case BET -> takeBet(action.getPlayerId(), action.getActionValue());
             case ACCEPT_INSURANCE -> buyInsurance(getHand(action.getPlayerId(), action.getHandId()));
@@ -203,6 +212,26 @@ public class Round {
 
     private Stream<PlayerHand> getAllPlayerHands() {
         return playerHands.values().stream().flatMap(Collection::stream);
+    }
+
+    public RoundInformation getInfo() {
+        return RoundInformation.builder()
+                .id(id)
+                .roundStatus(roundStatus)
+                .dealerHand(dealerHand.getInfo())
+                .players(playerHands.keySet().stream()
+                        .map(this::getPlayerRoundInformation)
+                        .toList())
+                .build();
+    }
+
+    private PlayerRoundInformation getPlayerRoundInformation(String playerId) {
+        return PlayerRoundInformation.builder()
+                .playerId(playerId)
+                .hands(playerHands.get(playerId).stream()
+                        .map(PlayerHand::getInfo)
+                        .toList())
+                .build();
     }
 
     public enum RoundStatus {
